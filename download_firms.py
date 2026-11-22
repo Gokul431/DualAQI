@@ -6,12 +6,12 @@ sensor is the same for every year. The box is padded around Punjab; build_inputs
 keeps only detections inside the Punjab state boundary.
 
 The MAP_KEY is read from the environment variable FIRMS_MAP_KEY and is never written to disk.
-Each 10-day chunk is saved as raw/firms/<source>_<start>.csv; existing chunks are skipped, so the
-script can be re-run after an interruption. An empty chunk (header only) is a valid result: no fires.
-Chunks are 5 days, the API's maximum.
+Requests are made in 5-day chunks (the API's maximum). Each chunk is saved as
+raw/firms/<source>_<start>.csv; existing chunks are skipped, so the script can be re-run after an
+interruption. An empty chunk (header only) is a valid result: no fires.
 
     set FIRMS_MAP_KEY=...            (PowerShell: $env:FIRMS_MAP_KEY="...")
-    .venv\\Scripts\\python download_firms.py --start 2019-01-01 --end 2023-12-31
+    .venv\\Scripts\\python download_firms.py --start 2018-12-01 --end 2025-12-31
 """
 import argparse
 import os

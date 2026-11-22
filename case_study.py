@@ -172,7 +172,7 @@ def main():
                                                      index=False, float_format='%.2f')
     met = episode_metrics(o, start, end)
     order = {m: i for i, m in enumerate(['Persistence', 'ARIMA', 'Ridge', 'GBM', 'RandomForest', 'XGBoost',
-                                         'Ensemble', 'LSTM', 'CNN', 'LateFusion', 'DualAQI-Net'])}
+                                         'Ensemble', 'LSTM'])}
     met = met.sort_values(['horizon', 'model'], key=lambda c: c.map(order) if c.name == 'model' else c)
     met.to_csv(os.path.join(out, 'case_study_metrics.csv'), index=False)
     plot(o, start, end, os.path.join(out, 'case_study_timeseries'))
@@ -195,7 +195,6 @@ def main():
         '(not a 24-h average).',
         '- POD = share of observed events that were forecast; FAR = share of forecast events that did not occur. '
         'Severe = AQI category Severe; Very poor+ = Very poor or Severe.',
-        '- DualAQI-Net, CNN and LateFusion are absent: no MODIS AOD yet.',
         '',
         '## Metrics inside the episode',
         '',

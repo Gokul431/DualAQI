@@ -6,7 +6,6 @@
    Above 20% suggests filled or daily values.
 3. No other pollutant leaked into PM2.5: PM2.5 is read by column name only; this checks that it
    never equals another pollutant column row-for-row, and that PM2.5 <= PM10 almost always.
-4. AOD inputs present or not (DualAQI-Net and the CNN / late-fusion baselines need them).
 """
 import glob
 import os
@@ -97,11 +96,6 @@ def main():
     print(f'  share of hours with PM2.5 > PM10: median {gt.share.median():.3f}, max {gt.share.max():.3f}')
     print('  ' + gt.sort_values('share', ascending=False).head(5).round(3).to_string(index=False).replace('\n', '\n  '))
     print('  PM2.5 is read by its column name only ("PM2.5 (µg/m³)"); no other column is read into it.')
-
-    print('\n== 4. AOD inputs')
-    for f in ['aod_daily.csv', 'aod_tiles.npz']:
-        print(f'  {f}: {"present" if os.path.exists(os.path.join(DATA, f)) else "NOT present"}')
-    print('  Without them, AOD features are empty and DualAQI-Net, CNN and LateFusion are skipped.')
 
 
 if __name__ == '__main__':

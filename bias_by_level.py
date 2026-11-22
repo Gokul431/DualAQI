@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Forecast bias by observed AQI category, over the whole test set (out-of-fold predictions).
 
-Answers: do models (in particular the LSTM, which DualAQI-Net builds on) under-forecast more than
+Answers: do models (in particular the LSTM, whose sequence branch DualAQI shares) under-forecast more than
 others on high-pollution days?
 
 Grouping is by the OBSERVED category. Note: any model trained on squared error, and Persistence too,

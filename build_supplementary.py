@@ -30,7 +30,7 @@ import dualaqi as D
 
 # ----------------------------------------------------------------------------- edit these two lines
 TITLE = ('DualAQI: gated fusion of ground observations and satellite fire activity for 24-72 h AQI '
-         'forecasting in Delhi [working title - replace with the manuscript title]')
+         'forecasting in Delhi')
 AUTHORS = '[Author names and affiliations - replace]'
 # -----------------------------------------------------------------------------
 

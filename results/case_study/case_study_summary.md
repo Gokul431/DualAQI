@@ -7,7 +7,6 @@
 - Observed AQI range: 62 to 577.
 - AQI here is the dualaqi.py mapping applied to the hourly city PM2.5 at the valid time (not a 24-h average).
 - POD = share of observed events that were forecast; FAR = share of forecast events that did not occur. Severe = AQI category Severe; Very poor+ = Very poor or Severe.
-- DualAQI-Net, CNN and LateFusion are absent: no MODIS AOD yet.
 
 ## Metrics inside the episode
 

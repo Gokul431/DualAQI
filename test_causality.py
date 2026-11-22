@@ -122,11 +122,11 @@ def main():
     ap.add_argument('--seed', type=int, default=0)
     args = ap.parse_args()
     rng = np.random.default_rng(123)
-    hourly, aod, tiles = D.load_inputs(args.data_dir)
+    hourly = D.load_inputs(args.data_dir)
     fire = D.load_fire(os.path.join(args.data_dir, 'punjab_fire_daily.csv'))
     if fire is None:
         raise SystemExit('data/punjab_fire_daily.csv not found')
-    s = D.build_samples(hourly, aod, tiles, [3], fire=fire)
+    s = D.build_samples(hourly, [3], fire=fire)
     ok1 = test_features(s['origins'], fire, rng)
     frp = D.load_fire(os.path.join(args.data_dir, 'punjab_fire_daily.csv'), 'frp_sum')
     ok1b = test_features_v2(s['origins'], fire, frp, hourly, rng) if frp is not None else True

@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
-DualAQI-Net benchmark for Delhi PM2.5 / AQI forecasting (CPU-only, retrospective).
+DualAQI and baseline models for 24/48/72 h AQI forecasting in Delhi (CPU-only, retrospective).
 
 Causality rules (every input is available at forecast time):
-  * A forecast origin t is a launch time (default 08:00 IST). Only data at or before t is used.
+  * A forecast origin t is a launch time (03:00 UTC = 08:30 IST in the study). Only data at or
+    before t is used.
   * Ground PM2.5 features are forward-filled at most 3 h. Targets are never imputed.
-  * Satellite (MODIS AOD) features for origin day D come only from days before D.
   * ERA5 meteorology features come only from times at or before t.
+  * The Punjab fire count of UTC day d is used only from 03:00 UTC on day d+1.
   * The target for horizon h is city PM2.5 at t+h, converted to AQI.
 
-Inputs (CSV / NPZ in --data-dir), see README.md for the schema:
-  pm25_hourly.csv   datetime, pm25              city-level PM2.5 (mean of stations, before AQI conversion)
-  era5_hourly.csv   datetime, t2m, rh, u10, v10, sp, blh
-  aod_daily.csv     date, aod_terra, aod_aqua   daily AOD summary (NaN where missing)
-  aod_tiles.npz     dates, tiles                optional: (n_days, 2, 16, 16) AOD tiles, enables DualAQI-Net
+Inputs (CSV in --data-dir, built by build_inputs.py; see README.md for the schema):
+  pm25_hourly.csv        datetime, pm25                  city-mean PM2.5 (mean of stations, before AQI conversion)
+  era5_hourly.csv        datetime, t2m, rh, u10, v10, sp, blh
+  punjab_fire_daily.csv  date, fire_count, frp_sum       daily VIIRS fire detections in Punjab
 """
 import argparse
 import os
@@ -43,19 +43,17 @@ LOOKBACK_H = 168
 MAX_H = max(HORIZONS)
 MET_VARS = ['t2m', 'rh', 'u10', 'v10', 'sp', 'blh']
 LAGS = [0, 1, 2, 3, 6, 12, 24, 48, 72, 168]
-SEQ_COLS = ['aqi_now', 'ws'] + MET_VARS + ['aod_diff_prev']
-AOD_MAX_AGE_DAYS = 3
-TILE_DAYS = 7
-TILE_SIZE = 16
-LOSS_W = np.array([0.25, 0.35, 0.40], dtype=np.float32)  # horizon weights from the manuscript
+SEQ_COLS = ['aqi_now', 'ws'] + MET_VARS
+LOSS_W = np.array([0.25, 0.35, 0.40], dtype=np.float32)  # loss weights for the 24, 48 and 72 h outputs
 ARIMA_ORDERS = [(1, 0, 0), (2, 0, 1), (2, 0, 2)]  # ARMA error orders; one picked per fold by AIC
 FIRE_LAGS = 7             # completed fire days seen by the event branch (same 7-day window as the PM2.5 history)
 FIRE_AVAILABLE_HOUR = 3   # the fire count for UTC day d may be used from 03:00 UTC on day d+1
 
-# Fill Holi and Eid dates from an official calendar before a real run. Only Diwali is listed.
+# Diwali dates 2019-2023. Diwali 2024-2025, Holi and Eid are not flagged (a stated limitation).
 FESTIVAL_DATES = pd.to_datetime(['2019-10-27', '2020-11-14', '2021-11-04', '2022-10-24', '2023-11-12'])
 
-# Piecewise-linear PM2.5 (24 h) -> AQI map. Verify against the official CPCB table before publishing.
+# Piecewise-linear PM2.5 -> AQI map on the CPCB National AQI breakpoints. The open-ended Severe band
+# (> 250 ug/m3) is mapped to 401-500 up to 350 ug/m3 and continued with slope 1 above (Supplementary Table S1).
 AQI_KNOTS_C = np.array([0., 30., 60., 90., 120., 250., 350.])
 AQI_KNOTS_I = np.array([0., 50., 100., 200., 300., 400., 500.])
 CAT_EDGES = np.array([50., 100., 200., 300., 400.])  # category index 0..5
@@ -87,14 +85,8 @@ def load_inputs(data_dir):
                      index_col='datetime').sort_index()
     met = pd.read_csv(os.path.join(data_dir, 'era5_hourly.csv'), parse_dates=['datetime'],
                       index_col='datetime').sort_index()
-    aod_path = os.path.join(data_dir, 'aod_daily.csv')
-    aod = None  # without AOD the satellite features are left out entirely
-    if os.path.exists(aod_path):
-        aod = pd.read_csv(aod_path, parse_dates=['date'], index_col='date').sort_index()
     idx = pd.date_range(pm.index.min(), pm.index.max(), freq='h')
-    hourly = pd.concat([pm[['pm25']], met[MET_VARS]], axis=1).reindex(idx)
-    tiles = load_tiles(os.path.join(data_dir, 'aod_tiles.npz'), idx)
-    return hourly, aod, tiles
+    return pd.concat([pm[['pm25']], met[MET_VARS]], axis=1).reindex(idx)
 
 
 def load_fire(path, column='fire_count'):
@@ -172,43 +164,9 @@ def event_features(origins, fire, opts=(), frp=None, transport=None):
     return np.hstack(cols).astype(np.float32)
 
 
-def load_tiles(path, hourly_index):
-    """Daily AOD tiles, carried forward at most AOD_MAX_AGE_DAYS (causal)."""
-    if not os.path.exists(path):
-        return None
-    z = np.load(path, allow_pickle=False)
-    dates = pd.DatetimeIndex(z['dates'])
-    days = pd.date_range(hourly_index[0].normalize(), hourly_index[-1].normalize(), freq='D')
-    arr = np.full((len(days),) + z['tiles'].shape[1:], np.nan, dtype=np.float32)
-    pos = days.get_indexer(dates)
-    ok = pos >= 0
-    arr[pos[ok]] = z['tiles'][ok]
-    flat = pd.DataFrame(arr.reshape(len(days), -1)).ffill(limit=AOD_MAX_AGE_DAYS).values
-    flat = np.nan_to_num(flat, nan=0.0).astype(np.float32)
-    return days, flat.reshape(arr.shape)
-
-
 # ----------------------------------------------------------------------------- features
 
-def aod_features(aod, hourly_index):
-    days = pd.date_range(hourly_index[0].normalize(), hourly_index[-1].normalize(), freq='D')
-    a = aod[['aod_terra', 'aod_aqua']].reindex(days)
-    any_valid = a.notna().any(axis=1).values
-    last_valid = pd.Series(days.where(any_valid), index=days).ffill()
-    prev = a.ffill(limit=AOD_MAX_AGE_DAYS).shift(1)  # strictly earlier days only
-    age = (pd.Series(days, index=days) - last_valid.shift(1)).dt.days
-    out = pd.DataFrame({
-        'aod_terra_prev': prev['aod_terra'].values,
-        'aod_aqua_prev': prev['aod_aqua'].values,
-        'aod_diff_prev': (prev['aod_aqua'] - prev['aod_terra']).values,
-        'aod_age_days': age.values,
-    }, index=days)
-    out = out.reindex(hourly_index.normalize())
-    out.index = hourly_index
-    return out
-
-
-def base_features(hourly, aod):
+def base_features(hourly):
     pm = hourly['pm25'].ffill(limit=3)
     met = hourly[MET_VARS].ffill(limit=3)
     f = pd.DataFrame(index=hourly.index)
@@ -223,9 +181,6 @@ def base_features(hourly, aod):
     f['ws'] = np.hypot(met['u10'], met['v10'])
     f['blh_mean24'] = met['blh'].rolling(24, min_periods=18).mean()
     f['aqi_now'] = aqi_series(pm)
-    if aod is not None:
-        f = f.join(aod_features(aod, hourly.index))
-        f['aod_age_days'] = f['aod_age_days'].fillna(999)
     return f
 
 
@@ -242,19 +197,14 @@ def calendar_features(ts):
     }, index=ts)
 
 
-def build_samples(hourly, aod, tiles, launch_hours, fire=None, event_opts=(), frp=None):
-    base = base_features(hourly, aod)
+def build_samples(hourly, launch_hours, fire=None, event_opts=(), frp=None):
+    base = base_features(hourly)
     pm = hourly['pm25']
     origins_all = base.index[base.index.hour.isin(launch_hours)]
     Xb_all = base.reindex(origins_all)
     Y_all = pd.DataFrame({h: aqi_series(pm.shift(-h)).reindex(origins_all).values for h in HORIZONS},
                          index=origins_all)
-    core_cols = [c for c in Xb_all.columns if not c.startswith('aod_')]
-    keep = Xb_all[core_cols].notna().all(axis=1).values & Y_all.notna().all(axis=1).values
-    if tiles is not None:
-        days, _ = tiles
-        dpos = np.asarray((origins_all.normalize() - days[0]).days)
-        keep &= dpos >= TILE_DAYS
+    keep = Xb_all.notna().all(axis=1).values & Y_all.notna().all(axis=1).values
     if fire is not None:  # same origins for DualAQI and --no-fire: only those with all fire lags present
         keep &= np.isfinite(fire_lag_matrix(origins_all, fire)).all(axis=1)
     origins = origins_all[keep]
@@ -270,16 +220,8 @@ def build_samples(hourly, aod, tiles, launch_hours, fire=None, event_opts=(), fr
     # Sequence windows: the 168 hourly rows ending at the origin.
     pos = hourly.index.get_indexer(origins)
     win = pos[:, None] - np.arange(LOOKBACK_H - 1, -1, -1)[None, :]
-    seq_cols = [c for c in SEQ_COLS if c in base.columns]  # aod_diff_prev only when AOD exists
-    seq_arr = base[seq_cols].ffill(limit=24).fillna(0.0).values.astype(np.float32)
+    seq_arr = base[SEQ_COLS].ffill(limit=24).fillna(0.0).values.astype(np.float32)
     seq = seq_arr[win]
-
-    tiles_in = None
-    if tiles is not None:
-        days, tarr = tiles
-        dpos = np.asarray((origins.normalize() - days[0]).days)
-        tpos = dpos[:, None] - np.arange(1, TILE_DAYS + 1)[None, :]  # previous 7 days only
-        tiles_in = tarr[tpos].reshape(len(origins), 2 * TILE_DAYS, TILE_SIZE, TILE_SIZE)
 
     event = None
     if fire is not None:
@@ -288,7 +230,7 @@ def build_samples(hourly, aod, tiles, launch_hours, fire=None, event_opts=(), fr
         if not np.isfinite(event).all():
             raise SystemExit(f'event features incomplete for {int((~np.isfinite(event)).any(axis=1).sum())} origins '
                              f'(opts {event_opts}); extend the fire file further back')
-    return {'origins': origins, 'Xb': Xb, 'X': X, 'Y': Y, 'seq': seq, 'tiles': tiles_in, 'event': event}
+    return {'origins': origins, 'Xb': Xb, 'X': X, 'Y': Y, 'seq': seq, 'event': event}
 
 
 # ----------------------------------------------------------------------------- models
@@ -363,19 +305,11 @@ def arima_fold(pm, origins, tr, te):
 
 
 if torch is not None:
-    def tile_cnn(n_tile_ch, hidden):
-        """Satellite branch: keeps the spatial grid (16 -> 8 -> 4 -> 2) and flattens it."""
-        return nn.Sequential(
-            nn.Conv2d(n_tile_ch, 32, 3, padding=1), nn.GroupNorm(8, 32), nn.ReLU(), nn.AvgPool2d(2),
-            nn.Conv2d(32, 64, 3, padding=1), nn.GroupNorm(8, 64), nn.ReLU(), nn.AvgPool2d(2),
-            nn.Conv2d(64, 64, 3, padding=1), nn.GroupNorm(8, 64), nn.ReLU(), nn.AvgPool2d(2),
-            nn.Flatten(), nn.Linear(64 * 2 * 2, hidden))
-
     def mlp_head(hidden):
         return nn.Sequential(nn.Linear(hidden, 64), nn.ReLU(), nn.Dropout(0.3), nn.Linear(64, len(HORIZONS)))
 
     class SeqLSTM(nn.Module):
-        """Sequence baseline: LSTM over the 168-hour window (no satellite tiles)."""
+        """Sequence baseline: LSTM over the 168-hour window with a linear output layer."""
 
         def __init__(self, n_in, hidden=64):
             super().__init__()
@@ -385,27 +319,6 @@ if torch is not None:
         def forward(self, seq):
             _, (hn, _) = self.lstm(seq)
             return self.head(hn[-1])
-
-    class DualAQINet(nn.Module):
-        """Temporal LSTM + satellite CNN fused by a learned gate.
-
-        The CNN keeps its spatial grid (16 -> 8 -> 4 -> 2) and flattens it, so spatial
-        information reaches the fusion layer. There is no spatial attention.
-        """
-
-        def __init__(self, n_in, hidden=64, n_tile_ch=2 * TILE_DAYS):
-            super().__init__()
-            self.lstm = nn.LSTM(n_in, hidden, batch_first=True)
-            self.cnn = tile_cnn(n_tile_ch, hidden)
-            self.gate = nn.Linear(2 * hidden, hidden)
-            self.head = mlp_head(hidden)
-
-        def forward(self, seq, tiles):
-            _, (hn, _) = self.lstm(seq)
-            h = hn[-1]
-            s = self.cnn(tiles)
-            g = torch.sigmoid(self.gate(torch.cat([h, s], dim=1)))
-            return self.head(g * h + (1 - g) * s)
 
     class DualAQI(nn.Module):
         """Dual-branch LSTM: sequence branch (PM2.5 + ERA5, 168 h) and event branch (lagged Punjab
@@ -440,34 +353,6 @@ if torch is not None:
                 h = g * h + (1 - g) * self.event_proj(e)
             return self.head(h)
 
-    class TileCNN(nn.Module):
-        """Standalone CNN baseline: satellite tiles only (same CNN branch as DualAQI-Net)."""
-
-        def __init__(self, hidden=64, n_tile_ch=2 * TILE_DAYS):
-            super().__init__()
-            self.cnn = tile_cnn(n_tile_ch, hidden)
-            self.head = mlp_head(hidden)
-
-        def forward(self, tiles):
-            return self.head(self.cnn(tiles))
-
-    class LateFusion(nn.Module):
-        """Simple late (decision-level) fusion baseline.
-
-        An LSTM branch and a CNN branch each predict all horizons; the outputs are mixed with one
-        learned weight per horizon. Unlike DualAQI-Net, the modalities never interact before the output.
-        """
-
-        def __init__(self, n_in, hidden=64, n_tile_ch=2 * TILE_DAYS):
-            super().__init__()
-            self.seq_branch = SeqLSTM(n_in, hidden)
-            self.tile_branch = TileCNN(hidden, n_tile_ch)
-            self.mix = nn.Parameter(torch.zeros(len(HORIZONS)))
-
-        def forward(self, seq, tiles):
-            a = torch.sigmoid(self.mix)
-            return a * self.seq_branch(seq) + (1 - a) * self.tile_branch(tiles)
-
 
 def standardize(W_tr, W_te):
     F = W_tr.shape[2]
@@ -484,7 +369,7 @@ def train_nn(make_net, Xs_tr, Y_tr, Xs_te, seed, epochs=15, batch=128, lr=1e-3, 
     early_stop: the last val_frac of the training rows are validation, with val_gap rows (days)
     dropped before them so their targets do not overlap the fitted rows; up to max_epochs,
     stop after `patience` epochs without a lower validation loss, restore the best weights.
-    With early_stop=False the behaviour is exactly the fixed-epoch training used before.
+    early_stop=False (the setting used for all reported results) trains for a fixed number of epochs.
     """
     torch.manual_seed(seed)
     torch.set_num_threads(min(4, os.cpu_count() or 1))
@@ -612,7 +497,7 @@ def run_dualaqi_cv(origins, Xb, Y, folds, seq, event, seed, use_fire, name=None,
     return pd.concat(out, ignore_index=True)
 
 
-def run_cv(origins, Xb, X, Y, folds, seq, tiles_in, use_nn, seed, pm=None):
+def run_cv(origins, Xb, X, Y, folds, seq, use_nn, seed, pm=None):
     out = []
     for fold_id, (tr, te) in enumerate(folds):
         t0 = time.time()
@@ -631,16 +516,6 @@ def run_cv(origins, Xb, X, Y, folds, seq, tiles_in, use_nn, seed, pm=None):
             p_lstm = train_nn(lambda: SeqLSTM(seq.shape[2]), [seq_tr], Ytr, [seq_te], seed)
             for j, h in enumerate(HORIZONS):
                 out.append(_rows('LSTM', h, origins[te], fold_id, Y[h].values[te], p_lstm[:, j]))
-            if tiles_in is not None:
-                nets = {
-                    'DualAQI-Net': (lambda: DualAQINet(seq.shape[2]), [seq_tr, tiles_in[tr]], [seq_te, tiles_in[te]]),
-                    'CNN': (lambda: TileCNN(), [tiles_in[tr]], [tiles_in[te]]),
-                    'LateFusion': (lambda: LateFusion(seq.shape[2]), [seq_tr, tiles_in[tr]], [seq_te, tiles_in[te]]),
-                }
-                for name, (make, xs_tr, xs_te) in nets.items():
-                    p_net = train_nn(make, xs_tr, Ytr, xs_te, seed)
-                    for j, h in enumerate(HORIZONS):
-                        out.append(_rows(name, h, origins[te], fold_id, Y[h].values[te], p_net[:, j]))
         extra = f', ARIMA order {arima_order}' if arima_order else ''
         print(f'  fold {fold_id}: {len(te)} test origins, {time.time() - t0:.1f}s{extra}', flush=True)
     return pd.concat(out, ignore_index=True)
@@ -717,7 +592,7 @@ def main():
     ap.add_argument('--no-arima', action='store_true', help='skip the ARIMA baseline')
     ap.add_argument('--k-blocks', type=int, default=10)
     ap.add_argument('--forward-start', default=None, help='first test date; default: first origin + 365 days')
-    ap.add_argument('--no-nn', action='store_true', help='skip LSTM and DualAQI-Net')
+    ap.add_argument('--no-nn', action='store_true', help='skip the LSTM')
     ap.add_argument('--seed', type=int, default=0)
     ap.add_argument('--n-boot', type=int, default=1000)
     ap.add_argument('--fire-file', default=None, help='daily fire counts; default: <data-dir>/punjab_fire_daily.csv')
@@ -737,7 +612,7 @@ def main():
     args = ap.parse_args()
     os.makedirs(args.out_dir, exist_ok=True)
 
-    hourly, aod, tiles = load_inputs(args.data_dir)
+    hourly = load_inputs(args.data_dir)
     hours = [int(x) for x in args.launch_hours.split(',')]
     fire = load_fire(args.fire_file or os.path.join(args.data_dir, 'punjab_fire_daily.csv'))
     if args.only_dualaqi and fire is None:
@@ -750,15 +625,13 @@ def main():
         raise SystemExit(f'unknown --event-opts {bad}; choose from {EVENT_OPTS}')
     frp = load_fire(args.fire_file or os.path.join(args.data_dir, 'punjab_fire_daily.csv'), 'frp_sum') \
         if 'frp' in opts else None
-    s = build_samples(hourly, aod, tiles, hours, fire=fire, event_opts=opts, frp=frp)
+    s = build_samples(hourly, hours, fire=fire, event_opts=opts, frp=frp)
     origins = s['origins']
     print(f'origins: {len(origins)}  {origins[0]} -> {origins[-1]}  launch hours: {hours}')
     if fire is not None:
         print(f'fire counts: {fire.index[0].date()} -> {fire.index[-1].date()}, {FIRE_LAGS} lagged days per origin; '
               f'event options: {opts or "none (v1)"}; event inputs: {s["event"].shape[1]}; '
               f'early stopping: {"on" if args.early_stop else "off"}')
-    print(f"AOD daily summary: {'found' if aod is not None else 'not found (AOD features left out)'}")
-    print(f"satellite tiles: {'found' if tiles is not None else 'not found (DualAQI-Net, CNN, LateFusion skipped)'}")
     print(f"XGBoost: {'on' if XGBRegressor is not None else 'xgboost not installed, skipped'}; "
           f"ARIMA (Fourier regression + ARMA errors, order by AIC from {ARIMA_ORDERS}): "
           f"{'off' if args.no_arima else 'on'}")
@@ -795,7 +668,7 @@ def main():
                                  use_fire=not args.no_fire, name=name, early_stop=args.early_stop,
                                  fold_ids=fold_ids)
         else:
-            oof = run_cv(origins, s['Xb'], s['X'], s['Y'], folds, s['seq'], s['tiles'], use_nn, args.seed,
+            oof = run_cv(origins, s['Xb'], s['X'], s['Y'], folds, s['seq'], use_nn, args.seed,
                          pm=None if args.no_arima else hourly['pm25'])
         oof['scheme'] = scheme
         oofs.append(oof)
