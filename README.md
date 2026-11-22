@@ -152,3 +152,12 @@ Outputs in `--out-dir`:
 - This is a retrospective study. ERA5 is not available in real time, so the pipeline cannot run operationally as written. An operational version would need an analysis or forecast product (for example, ECMWF operational fields) and retraining.
 - The city-level target averages stations before AQI conversion. The spatial structure of the satellite tiles is therefore not matched by a spatial target.
 - One test year (2023) for the earlier results; the forward CV covers 2020–2023 in expanding windows.
+
+## Licence and data sources
+
+The code in this repository is released under the MIT License (see `LICENSE`). The MIT License covers the code only. The input data in `data/` and the outputs derived from it in `results/` come from the third-party sources below and remain under their own terms; please cite them when you reuse the data.
+
+- **PM2.5:** hourly station data from the Central Pollution Control Board (CPCB) / Delhi Pollution Control Committee (DPCC) network, Government of India open data.
+- **Meteorology:** ERA5 hourly reanalysis (Hersbach et al., 2020) obtained through the Open-Meteo archive API (CC BY 4.0). Contains modified Copernicus Climate Change Service information [2026]. Neither the European Commission nor ECMWF is responsible for any use of the Copernicus information or data it contains.
+- **Fire activity:** NASA FIRMS VIIRS S-NPP active fire product (standard processing). We acknowledge the use of data and imagery from NASA's Fire Information for Resource Management System (FIRMS) (https://www.earthdata.nasa.gov/firms), part of NASA's Earth Science Data and Information System (ESDIS).
+- **Boundary:** GADM 4.1 Punjab polygon, used only to select fires. It is not redistributed here (GADM data are free for academic use, but redistribution is not allowed).
