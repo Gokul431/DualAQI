@@ -1,0 +1,25 @@
+PM2.5: 1577664 station-hours in 36 station files, years 2019-2023
+  131280 blank / NA
+  dropped 0 values <= 0 and 0 > 1000; 15 values exactly 1000 kept (possible instrument ceiling)
+  stations with PM2.5 per year: {2019: 35, 2020: 35, 2021: 36, 2022: 36, 2023: 36}
+  distinct stations overall: 36
+  wrote data\pm25_hourly.csv and pm25_station_hours.csv
+pm25: 43824 hours with data, 2018-12-31 20:00:00 -> 2023-12-31 19:00:00
+  hours with data per year: {2018: 4, 2019: 8760, 2020: 8784, 2021: 8760, 2022: 8760, 2023: 8756}
+ERA5 from Open-Meteo (models=era5), years 2018-2023
+  2018: grid=(28.75N, 77.25E), 8760 hours, 0 hours with a missing variable
+  2019: grid=(28.75N, 77.25E), 8760 hours, 0 hours with a missing variable
+  2020: grid=(28.75N, 77.25E), 8784 hours, 0 hours with a missing variable
+  2021: grid=(28.75N, 77.25E), 8760 hours, 0 hours with a missing variable
+  2022: grid=(28.75N, 77.25E), 8760 hours, 0 hours with a missing variable
+  2023: grid=(28.75N, 77.25E), 8760 hours, 0 hours with a missing variable
+  check vs CDS NetCDF on 9504 overlapping hours (Open-Meteo - CDS):
+    t2m  mean|d|=  0.031 K    max|d|=  0.075  r=0.99999
+    d2m  mean|d|=  0.031 K    max|d|=  0.075  r=0.99999
+    u10  mean|d|=  0.025 m/s  max|d|=  0.082  r=0.99989
+    v10  mean|d|=  0.026 m/s  max|d|=  0.089  r=0.99975
+    sp   mean|d|=  0.697 hPa  max|d|=  1.707  r=0.99905
+    blh  mean|d|=  1.239 m    max|d|=  2.500  r=1.00000
+  wrote data\era5_hourly.csv
+era5 (all variables present): 52584 hours with data, 2018-01-01 00:00:00 -> 2023-12-31 23:00:00
+  hours with data per year: {2018: 8760, 2019: 8760, 2020: 8784, 2021: 8760, 2022: 8760, 2023: 8760}

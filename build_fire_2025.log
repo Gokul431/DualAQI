@@ -1,0 +1,7 @@
+FIRMS VIIRS S-NPP: 601961 detections in the download box, 0 duplicates dropped
+  inside Punjab: 438240; type counts {0: 436847, 2: 1353, 3: 40}
+  confidence counts (kept): {'n': 358942, 'l': 59153, 'h': 18752}
+  wrote data\punjab_fire_daily.csv: 2588 days, 2018-12-01 -> 2025-12-31, no missing days, no negative counts
+  fires per year: {2018: 401, 2019: 68622, 2020: 95069, 2021: 94923, 2022: 68976, 2023: 52237, 2024: 31650, 2025: 24969}
+  of which Oct-Nov: {2019: 44886, 2020: 75388, 2021: 78068, 2022: 46524, 2023: 30978, 2024: 9006, 2025: 4100}
+  days with zero fires: 628; max per day 6179 on 2021-11-05

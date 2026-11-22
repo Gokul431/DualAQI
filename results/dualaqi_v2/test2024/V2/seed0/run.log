@@ -1,0 +1,36 @@
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:95: Pandas4Warning: Sorting by default when concatenating all DatetimeIndex is deprecated.  In the future, pandas will respect the default of `sort=False`. Specify `sort=True` or `sort=False` to silence this message. If you see this warnings when not directly calling concat, report a bug to pandas.
+  hourly = pd.concat([pm[['pm25']], met[MET_VARS]], axis=1).reindex(idx)
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:235: Pandas4Warning: DatetimeIndex.dayofyear is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_year instead.
+  doy = ts.dayofyear.values
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:236: Pandas4Warning: DatetimeIndex.dayofweek is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_week instead.
+  dow = ts.dayofweek.values
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:235: Pandas4Warning: DatetimeIndex.dayofyear is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_year instead.
+  doy = ts.dayofyear.values
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:236: Pandas4Warning: DatetimeIndex.dayofweek is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_week instead.
+  dow = ts.dayofweek.values
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:235: Pandas4Warning: DatetimeIndex.dayofyear is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_year instead.
+  doy = ts.dayofyear.values
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:236: Pandas4Warning: DatetimeIndex.dayofweek is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_week instead.
+  dow = ts.dayofweek.values
+origins: 2364  2019-01-08 03:00:00 -> 2025-12-28 03:00:00  launch hours: [3]
+fire counts: 2018-12-01 -> 2025-12-31, 7 lagged days per origin; event options: ('frp',); event inputs: 24; early stopping: off
+AOD daily summary: not found (AOD features left out)
+satellite tiles: not found (DualAQI-Net, CNN, LateFusion skipped)
+XGBoost: on; ARIMA (Fourier regression + ARMA errors, order by AIC from [(1, 0, 0), (2, 0, 1), (2, 0, 2)]): on
+== forward CV: 6 folds (ids 16-21)
+   model: DualAQI-v2, seed 0
+  fold 16: 73 test origins, 24.2s
+  fold 17: 90 test origins, 25.2s
+  fold 18: 90 test origins, 25.7s
+  fold 19: 90 test origins, 27.5s
+  fold 20: 90 test origins, 27.5s
+  fold 21: 90 test origins, 27.9s
+ scheme  horizon       model    RMSE    MAE    R2  CatAcc  skill_RMSE_vs_persist
+forward       24  DualAQI-v2  70.119 50.456 0.775   0.442                  0.082
+forward       24 Persistence  76.366 50.654 0.734   0.520                  0.000
+forward       48  DualAQI-v2  76.199 54.773 0.735   0.421                  0.157
+forward       48 Persistence  90.406 61.864 0.627   0.444                  0.000
+forward       72  DualAQI-v2  79.909 57.489 0.708   0.407                  0.206
+forward       72 Persistence 100.680 69.625 0.537   0.423                  0.000
+wrote results/dualaqi_v2/test2024/V2/seed0/benchmark_long.csv and oof_predictions.csv.gz
+EXIT 0

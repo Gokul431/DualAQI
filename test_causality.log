@@ -1,0 +1,12 @@
+Test 1 (features): 300 origins checked
+  every used fire day d satisfies origin >= d+1 03:00 UTC: True
+  the next day would not yet be allowed (window is as recent as the rule permits): True
+  origins whose features changed when future fire counts were randomised: 0  (must be 0)
+  negative control, origins that changed when the last usable day was altered: 300 of 300  (must be all)
+Test 2 (end to end): forward fold 0, 355 training origins, 90 test origins 2020-01-08 -> 2020-04-06
+  fire counts randomised from 2020-02-22 onward; 46 test origins must be unchanged
+  max |prediction change| for those origins: 0  (must be 0)
+  later origins (allowed to see the changed days) whose predictions changed: 44 of 44
+  negative control: altering 2020-02-21 changed 7 of 7 origins that use that day  (must be all)
+
+RESULT: features PASS, end to end PASS

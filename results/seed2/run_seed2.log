@@ -1,0 +1,95 @@
+C:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:93: Pandas4Warning: Sorting by default when concatenating all DatetimeIndex is deprecated.  In the future, pandas will respect the default of `sort=False`. Specify `sort=True` or `sort=False` to silence this message. If you see this warnings when not directly calling concat, report a bug to pandas.
+  hourly = pd.concat([pm[['pm25']], met[MET_VARS]], axis=1).reindex(idx)
+C:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:158: Pandas4Warning: DatetimeIndex.dayofyear is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_year instead.
+  doy = ts.dayofyear.values
+C:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:159: Pandas4Warning: DatetimeIndex.dayofweek is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_week instead.
+  dow = ts.dayofweek.values
+C:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:158: Pandas4Warning: DatetimeIndex.dayofyear is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_year instead.
+  doy = ts.dayofyear.values
+C:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:159: Pandas4Warning: DatetimeIndex.dayofweek is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_week instead.
+  dow = ts.dayofweek.values
+C:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:158: Pandas4Warning: DatetimeIndex.dayofyear is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_year instead.
+  doy = ts.dayofyear.values
+C:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:159: Pandas4Warning: DatetimeIndex.dayofweek is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_week instead.
+  dow = ts.dayofweek.values
+origins: 1816  2019-01-08 03:00:00 -> 2023-12-28 03:00:00  launch hours: [3]
+AOD daily summary: not found (AOD features left out)
+satellite tiles: not found (DualAQI-Net, CNN, LateFusion skipped)
+XGBoost: on; ARIMA (Fourier regression + ARMA errors, order by AIC from [(1, 0, 0), (2, 0, 1), (2, 0, 2)]): off
+== blocked CV: 10 folds
+  fold 0: 181 test origins, 18.7s
+  fold 1: 182 test origins, 17.0s
+  fold 2: 181 test origins, 16.8s
+  fold 3: 182 test origins, 21.4s
+  fold 4: 182 test origins, 16.5s
+  fold 5: 181 test origins, 16.7s
+  fold 6: 182 test origins, 17.2s
+  fold 7: 181 test origins, 17.4s
+  fold 8: 182 test origins, 17.8s
+  fold 9: 182 test origins, 18.5s
+== forward CV: 16 folds
+  fold 0: 90 test origins, 8.8s
+  fold 1: 90 test origins, 9.6s
+  fold 2: 90 test origins, 8.7s
+  fold 3: 90 test origins, 8.8s
+  fold 4: 90 test origins, 9.7s
+  fold 5: 90 test origins, 10.3s
+  fold 6: 90 test origins, 10.8s
+  fold 7: 90 test origins, 11.7s
+  fold 8: 90 test origins, 12.4s
+  fold 9: 90 test origins, 13.5s
+  fold 10: 90 test origins, 13.7s
+  fold 11: 90 test origins, 14.4s
+  fold 12: 90 test origins, 15.3s
+  fold 13: 90 test origins, 16.2s
+  fold 14: 90 test origins, 16.8s
+  fold 15: 90 test origins, 17.4s
+ scheme  horizon        model    RMSE    MAE    R2  CatAcc  skill_RMSE_vs_persist
+blocked       24     Ensemble  77.334 55.795 0.718   0.461                  0.155
+blocked       24          GBM  82.155 59.789 0.682   0.450                  0.102
+blocked       24         LSTM  79.734 58.569 0.700   0.450                  0.128
+blocked       24  Persistence  91.482 62.003 0.606   0.500                  0.000
+blocked       24 RandomForest  78.669 56.496 0.708   0.447                  0.140
+blocked       24        Ridge  78.517 57.457 0.709   0.451                  0.142
+blocked       24      XGBoost  81.108 57.946 0.690   0.455                  0.113
+blocked       48     Ensemble  87.440 64.624 0.640   0.406                  0.211
+blocked       48          GBM  94.637 69.749 0.578   0.371                  0.146
+blocked       48         LSTM  87.189 63.971 0.642   0.426                  0.213
+blocked       48  Persistence 110.777 77.192 0.422   0.416                  0.000
+blocked       48 RandomForest  87.543 64.424 0.639   0.411                  0.210
+blocked       48        Ridge  89.305 66.250 0.624   0.397                  0.194
+blocked       48      XGBoost  91.425 67.198 0.606   0.400                  0.175
+blocked       72     Ensemble  91.046 67.398 0.609   0.391                  0.221
+blocked       72          GBM  98.315 72.523 0.545   0.374                  0.159
+blocked       72         LSTM  90.625 66.624 0.613   0.410                  0.224
+blocked       72  Persistence 116.847 83.060 0.357   0.387                  0.000
+blocked       72 RandomForest  90.545 66.774 0.614   0.396                  0.225
+blocked       72        Ridge  93.534 70.012 0.588   0.376                  0.200
+blocked       72      XGBoost  94.607 69.738 0.578   0.384                  0.190
+forward       24     Ensemble  74.635 54.786 0.731   0.476                  0.150
+forward       24          GBM  80.244 59.472 0.689   0.442                  0.086
+forward       24         LSTM  78.964 57.642 0.699   0.452                  0.101
+forward       24  Persistence  87.805 59.480 0.628   0.505                  0.000
+forward       24 RandomForest  76.044 55.221 0.721   0.460                  0.134
+forward       24        Ridge  76.529 57.225 0.717   0.442                  0.128
+forward       24      XGBoost  78.638 57.734 0.701   0.458                  0.104
+forward       48     Ensemble  84.594 62.977 0.654   0.422                  0.203
+forward       48          GBM  91.795 68.723 0.593   0.379                  0.135
+forward       48         LSTM  86.585 63.095 0.638   0.424                  0.184
+forward       48  Persistence 106.143 73.930 0.456   0.414                  0.000
+forward       48 RandomForest  85.007 62.744 0.651   0.426                  0.199
+forward       48        Ridge  87.045 65.743 0.634   0.399                  0.180
+forward       48      XGBoost  91.011 67.259 0.600   0.399                  0.143
+forward       72     Ensemble  88.241 66.143 0.624   0.408                  0.212
+forward       72          GBM  95.893 72.026 0.556   0.367                  0.143
+forward       72         LSTM  90.283 66.206 0.607   0.415                  0.193
+forward       72  Persistence 111.918 79.777 0.395   0.388                  0.000
+forward       72 RandomForest  88.189 65.611 0.625   0.403                  0.212
+forward       72        Ridge  91.027 69.050 0.600   0.385                  0.187
+forward       72      XGBoost  94.430 70.099 0.570   0.385                  0.156
+wrote results/seed2/benchmark_long.csv and oof_predictions.csv.gz
+
+real	6m23.109s
+user	0m0.000s
+sys	0m0.015s
+SEED2 EXIT 0

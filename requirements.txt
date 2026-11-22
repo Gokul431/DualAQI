@@ -1,0 +1,6 @@
+numpy>=1.24
+pandas>=2.0
+scikit-learn>=1.3
+# CPU-only PyTorch (optional; needed for the LSTM and DualAQI-Net runs):
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.1

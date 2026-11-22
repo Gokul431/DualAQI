@@ -1,0 +1,28 @@
+comparison,horizon,season,n,dRMSE,CI95_day_lo,CI95_day_hi,CI95_7dblock_lo,CI95_7dblock_hi,excludes_zero_day,excludes_zero_7dblock
+DualAQI v2 - DualAQI v1,24,all,720,-0.6230,-1.1627,-0.0984,-1.2050,-0.0830,True,True
+DualAQI v2 - LSTM,24,all,720,1.2800,-0.4877,2.9586,-0.6943,3.3580,False,False
+DualAQI v1 - LSTM,24,all,720,1.9029,0.0385,3.6247,-0.1934,4.0406,True,False
+DualAQI v2 - DualAQI v1,24,Oct-Nov,122,-0.2108,-2.0768,1.3846,-2.1457,1.1677,False,False
+DualAQI v2 - LSTM,24,Oct-Nov,122,0.6974,-2.5318,4.1802,-4.0163,4.9275,False,False
+DualAQI v1 - LSTM,24,Oct-Nov,122,0.9081,-2.8270,5.3318,-4.3313,6.3241,False,False
+DualAQI v2 - DualAQI v1,24,rest of year,598,-0.7172,-1.2054,-0.2034,-1.2503,-0.1656,True,True
+DualAQI v2 - LSTM,24,rest of year,598,1.4158,-0.5614,3.3861,-0.7763,3.8639,False,False
+DualAQI v1 - LSTM,24,rest of year,598,2.1330,0.1883,4.1673,-0.0691,4.5141,True,False
+DualAQI v2 - DualAQI v1,48,all,720,-0.2025,-0.7371,0.3430,-0.8910,0.4362,False,False
+DualAQI v2 - LSTM,48,all,720,0.0511,-1.5520,1.6352,-1.9960,2.2159,False,False
+DualAQI v1 - LSTM,48,all,720,0.2537,-1.3935,1.8676,-2.1188,2.7712,False,False
+DualAQI v2 - DualAQI v1,48,Oct-Nov,122,0.8688,-0.7397,2.4535,-1.3322,2.4944,False,False
+DualAQI v2 - LSTM,48,Oct-Nov,122,0.7244,-3.5556,4.8354,-3.7722,5.1435,False,False
+DualAQI v1 - LSTM,48,Oct-Nov,122,-0.1444,-5.3187,4.5678,-5.3644,5.3303,False,False
+DualAQI v2 - DualAQI v1,48,rest of year,598,-0.4643,-1.0032,0.1053,-1.0805,0.1462,False,False
+DualAQI v2 - LSTM,48,rest of year,598,-0.1139,-1.9602,1.7924,-2.3968,2.2037,False,False
+DualAQI v1 - LSTM,48,rest of year,598,0.3504,-1.5401,2.3221,-2.0791,2.8189,False,False
+DualAQI v2 - DualAQI v1,72,all,720,0.2357,-0.2662,0.7483,-0.4038,0.8511,False,False
+DualAQI v2 - LSTM,72,all,720,0.2956,-1.6462,2.2453,-2.0115,2.7038,False,False
+DualAQI v1 - LSTM,72,all,720,0.0599,-1.8398,2.0759,-2.3068,2.7584,False,False
+DualAQI v2 - DualAQI v1,72,Oct-Nov,122,0.8424,-0.5775,2.2862,-1.7135,2.7254,False,False
+DualAQI v2 - LSTM,72,Oct-Nov,122,0.3670,-5.0326,5.1097,-4.5128,5.8127,False,False
+DualAQI v1 - LSTM,72,Oct-Nov,122,-0.4754,-6.7297,4.6994,-6.1170,6.0694,False,False
+DualAQI v2 - DualAQI v1,72,rest of year,598,0.0876,-0.4489,0.5805,-0.3960,0.6010,False,False
+DualAQI v2 - LSTM,72,rest of year,598,0.2792,-1.7395,2.5803,-2.2526,2.9201,False,False
+DualAQI v1 - LSTM,72,rest of year,598,0.1916,-1.8743,2.3765,-2.2965,2.8113,False,False

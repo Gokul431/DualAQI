@@ -1,0 +1,46 @@
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:95: Pandas4Warning: Sorting by default when concatenating all DatetimeIndex is deprecated.  In the future, pandas will respect the default of `sort=False`. Specify `sort=True` or `sort=False` to silence this message. If you see this warnings when not directly calling concat, report a bug to pandas.
+  hourly = pd.concat([pm[['pm25']], met[MET_VARS]], axis=1).reindex(idx)
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:203: Pandas4Warning: DatetimeIndex.dayofyear is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_year instead.
+  doy = ts.dayofyear.values
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:204: Pandas4Warning: DatetimeIndex.dayofweek is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_week instead.
+  dow = ts.dayofweek.values
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:203: Pandas4Warning: DatetimeIndex.dayofyear is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_year instead.
+  doy = ts.dayofyear.values
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:204: Pandas4Warning: DatetimeIndex.dayofweek is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_week instead.
+  dow = ts.dayofweek.values
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:203: Pandas4Warning: DatetimeIndex.dayofyear is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_year instead.
+  doy = ts.dayofyear.values
+c:\Users\MJ\Downloads\dualaqi_cpu\dualaqi.py:204: Pandas4Warning: DatetimeIndex.dayofweek is deprecated and will be removed in a future version. Use DatetimeIndex.day_of_week instead.
+  dow = ts.dayofweek.values
+origins: 1816  2019-01-08 03:00:00 -> 2023-12-28 03:00:00  launch hours: [3]
+fire counts: 2019-01-01 -> 2023-12-31, 7 lagged days per origin
+AOD daily summary: not found (AOD features left out)
+satellite tiles: not found (DualAQI-Net, CNN, LateFusion skipped)
+XGBoost: on; ARIMA (Fourier regression + ARMA errors, order by AIC from [(1, 0, 0), (2, 0, 1), (2, 0, 2)]): on
+== forward CV: 16 folds
+   model: DualAQI-noFire (single-branch ablation), seed 0
+  fold 0: 90 test origins, 5.6s
+  fold 1: 90 test origins, 4.6s
+  fold 2: 90 test origins, 5.3s
+  fold 3: 90 test origins, 6.3s
+  fold 4: 90 test origins, 7.3s
+  fold 5: 90 test origins, 8.4s
+  fold 6: 90 test origins, 8.7s
+  fold 7: 90 test origins, 10.0s
+  fold 8: 90 test origins, 11.1s
+  fold 9: 90 test origins, 12.9s
+  fold 10: 90 test origins, 13.6s
+  fold 11: 90 test origins, 15.5s
+  fold 12: 90 test origins, 16.2s
+  fold 13: 90 test origins, 16.3s
+  fold 14: 90 test origins, 17.3s
+  fold 15: 90 test origins, 16.9s
+ scheme  horizon          model    RMSE    MAE    R2  CatAcc  skill_RMSE_vs_persist
+forward       24 DualAQI-noFire  79.672 57.891 0.693   0.448                  0.093
+forward       24    Persistence  87.805 59.480 0.628   0.505                  0.000
+forward       48 DualAQI-noFire  86.996 63.546 0.635   0.417                  0.180
+forward       48    Persistence 106.143 73.930 0.456   0.414                  0.000
+forward       72 DualAQI-noFire  90.267 66.637 0.607   0.392                  0.193
+forward       72    Persistence 111.918 79.777 0.395   0.388                  0.000
+wrote results/dualaqi/nofire/seed0/benchmark_long.csv and oof_predictions.csv.gz
+EXIT 0

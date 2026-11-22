@@ -1,0 +1,39 @@
+== Coverage
+  pm25_hourly.csv: first 2018-12-31 20:00:00, last 2023-12-31 19:00:00, 43824 hours with data
+  era5_hourly.csv: first 2018-01-01 00:00:00, last 2023-12-31 23:00:00, 52584 hours with data
+  years with no PM2.5: none
+
+== 1. Share of hours with city PM2.5, per year (UTC)
+  2019: 1.0000   stations per hour mean 33.4, min 10
+  2020: 1.0000   stations per hour mean 32.2, min 11
+  2021: 1.0000   stations per hour mean 32.6, min 9
+  2022: 1.0000   stations per hour mean 33.6, min 15
+  2023: 0.9995   stations per hour mean 33.1, min 0
+  station completeness (share of station-hours valid), median by year: {'2019': 0.971, '2020': 0.95, '2021': 0.952, '2022': 0.967, '2023': 0.95}
+
+== 2. Consecutive identical PM2.5 values
+  city series: 0.0001
+  per station-year: median 0.015, 90th pct 0.031, max 0.050
+  no station-year above 20%
+
+== 3. Other pollutants leaking into PM2.5
+  PM2.5 equal to another pollutant column, row-for-row: max share 0.0023
+                                 station  year         other    n  share
+                      118_DTU_Delhi_CPCB  2022  PM10 (µg/m³) 6965 0.0023
+                  5024_Alipur_Delhi_DPCC  2019  PM10 (µg/m³) 8204 0.0013
+                  1560_Bawana_Delhi_DPCC  2019  PM10 (µg/m³) 7643 0.0012
+1424_Jawaharlal_Nehru_Stadium_Delhi_DPCC  2020   NH3 (µg/m³) 8202 0.0010
+                      117_ITO_Delhi_CPCB  2019 Ozone (µg/m³) 8259 0.0010
+  share of hours with PM2.5 > PM10: median 0.001, max 0.064
+                           station  year      other    n  share
+  103_CRRI_Mathura_Road_Delhi_IITM  2021 PM2.5>PM10 7018  0.064
+    104_Burari_Crossing_Delhi_IITM  2022 PM2.5>PM10 4874  0.033
+          108_Aya_Nagar_Delhi_IITM  2021 PM2.5>PM10 7942  0.031
+               107_Pusa_Delhi_IITM  2023 PM2.5>PM10 7424  0.029
+  103_CRRI_Mathura_Road_Delhi_IITM  2023 PM2.5>PM10 7944  0.026
+  PM2.5 is read by its column name only ("PM2.5 (µg/m³)"); no other column is read into it.
+
+== 4. AOD inputs
+  aod_daily.csv: NOT present
+  aod_tiles.npz: NOT present
+  Without them, AOD features are empty and DualAQI-Net, CNN and LateFusion are skipped.

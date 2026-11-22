@@ -1,0 +1,13 @@
+model,description,RMSE_24,RMSE_24_sd,RMSE_48,RMSE_48_sd,RMSE_72,RMSE_72_sd,RMSE_mean_over_horizons,selected
+B,v1 + early stopping,90.868,5.049,93.988,2.105,96.226,2.570,93.694,False
+C,B + FRP,101.789,6.438,106.088,7.335,107.780,4.606,105.219,False
+D,B + wind transport,90.091,3.426,92.656,3.891,95.848,3.012,92.865,False
+E,B + 14/30-day fire sums,94.236,11.816,98.401,10.957,100.784,11.247,97.807,False
+F,B + FRP + transport + sums,96.874,8.676,100.967,8.700,102.261,8.052,100.034,False
+LSTM-ES,single-branch LSTM + early stopping,94.549,1.302,99.087,1.588,102.941,2.259,98.859,False
+C2,v1 + FRP,82.730,0.815,88.070,0.699,91.406,0.610,87.402,True
+D2,v1 + wind transport,84.789,0.405,89.328,0.687,92.312,0.644,88.810,False
+E2,v1 + 14/30-day fire sums,83.053,0.243,88.008,0.455,91.744,0.879,87.602,False
+F2,v1 + FRP + transport + sums,84.371,0.647,89.568,0.598,92.460,0.809,88.800,False
+v1,DualAQI v1 (15 epochs),83.055,0.421,88.278,0.484,91.974,0.750,87.769,False
+LSTM-v1,single-branch LSTM v1 (15 epochs),82.996,1.412,91.165,0.771,95.129,0.153,89.763,False
